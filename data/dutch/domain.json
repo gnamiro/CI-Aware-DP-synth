@@ -1,0 +1,13 @@
+{
+    "economic_status": 3,
+    "household_position": 8,
+    "household_size": 6,
+    "sex": 2,
+    "edu_level": 6,
+    "age": 12,
+    "marital_status": 4,
+    "country_birth": 3,
+    "citizenship": 3,
+    "prev_residence_place": 2,
+    "occupation": 2
+}

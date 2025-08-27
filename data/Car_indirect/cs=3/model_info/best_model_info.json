@@ -1,0 +1,9 @@
+{
+    "Model Name": "Support Vector Classifier",
+    "Best Parameters": {
+        "C": 1,
+        "kernel": "rbf",
+        "random_state": 42
+    },
+    "Accuracy": 0.6994219653179191
+}
