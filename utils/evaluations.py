@@ -5,7 +5,7 @@ import numpy as np
 
 import pandas as pd
 from preprocess import *
-from Evaluation.algorithms import *
+from evaluations.algorithms import *
 
 import sys
 import os

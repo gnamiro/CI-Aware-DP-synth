@@ -15,7 +15,6 @@ from dit import Distribution
 from dit.multivariate import entropy
 from dit.divergences import kullback_leibler_divergence
 
-import knncmi
 from sklearn.feature_selection import mutual_info_classif
 from sklearn.preprocessing import LabelEncoder
 
@@ -859,37 +858,17 @@ def load_datasets(data_path, i, eps):
     """
     if eps is None:
         datasets = {
-                    "orig": pd.read_csv(f"{data_path}/cs={i}/train_label.csv"),
-                    "greedy": pd.read_csv(f"{data_path}/cs={i}/greedy/results_greedy_{i}.csv"),
-                    "opt": pd.read_csv(f"{data_path}/cs={i}/opt/results_opt_{i}.csv"),
-                    'mst': pd.read_csv(f"{data_path}/cs={i}/mst/results_mst_{i}.csv"),
-                    # 'ours_cmi': pd.read_csv(f"{data_path}/cs={i}/cmi/results_mst_pmd_cmi_{i}.csv"), 
-                    # 'ours_mmd': pd.read_csv(f"{data_path}/cs={i}/ours_mmd/results_mst_pmd_mmd_{i}.csv"), 
-                    'ours_tvd_L2': pd.read_csv(f"{data_path}/cs={i}/tvd_L2/results_mst_pmd_tvd_L2_{i}.csv"),
-                    'ours_tvd_L2_2': pd.read_csv(f"{data_path}/cs={i}/tvd_L2/results_tvd_L2_same_space_{i}.csv")
-                    
+            "orig": pd.read_csv(f"{data_path}/cs={i}/train.csv")
                 }
         return datasets
     else:
         datasets = {
-                    # "orig": pd.read_csv(f"{data_path}/cs={i}/train_label.csv"),
+                    # "orig": pd.read_csv(f"{data_path}/cs={i}/train.csv"),
                     "greedy": pd.read_csv(f"{data_path}/cs={i}/greedy/eps={eps}/results_greedy_{i}.csv"),
-                    # "greedy_2": pd.read_csv(f"{data_path}/cs={i}/greedy/eps={eps}/results_greedy_same_size_{i}.csv"),
                     # "opt": pd.read_csv(f"{data_path}/cs={i}/opt/eps={eps}/results_opt_{i}.csv"),
-                    # "opt_2": pd.read_csv(f"{data_path}/cs={i}/opt/eps={eps}/results_opt_same_size_{i}.csv"),
                     'mst': pd.read_csv(f"{data_path}/cs={i}/mst/eps={eps}/results_mst_{i}.csv"),
-                    # 'mst_2': pd.read_csv(f"{data_path}/cs={i}/mst/eps={eps}/results_mst_same_size_{i}.csv"),
-                    # 'ours_cmi': pd.read_csv(f"{data_path}/cs={i}/cmi/eps={eps}/results_mst_cmi_{i}.csv"), 
-                    # 'ours_cmi_2': pd.read_csv(f"{data_path}/cs={i}/cmi/eps={eps}/results_mst_cmi_weighted_{i}.csv"), 
-                    # 'ours_cmi_3': pd.read_csv(f"{data_path}/cs={i}/cmi/eps={eps}/results_mst_cmi_weighted_optim_{i}.csv"), 
-                    # # 'ours_mmd': pd.read_csv(f"{data_path}/cs={i}/ours_mmd/eps={eps}/results_mst_pmd_mmd_{i}.csv"), 
-                    # 'ours_tvd_L2': pd.read_csv(f"{data_path}/cs={i}/tvd_L2/eps={eps}/results_mst_pmd_tvd_L2_{i}.csv"),
-                    # 'ours_tvd_L2_2': pd.read_csv(f"{data_path}/cs={i}/tvd_L2/eps={eps}/results_mst_tvd_L2_same_size_{i}.csv"),
                     'privCI': pd.read_csv(f"{data_path}/cs={i}/privCI/eps={eps}/results_privCI_{i}.csv"),
-                    # 'ours_tvd_L2': pd.read_csv(f"{data_path}/cs={i}/tvd_L2/eps={eps}/results_tvd_L2_same_space_{i}.csv"),
                     'hard_constraint': pd.read_csv(f"{data_path}/cs={i}/hard_constraint/eps={eps}/results_mst_hard_{i}.csv"),
-                    # 'mst+otclean': pd.read_csv(f"{data_path}/cs={i}/otclean/eps={eps}/clean_train_dist.csv"),
-                    # 'mst+otclean+': pd.read_csv(f"{data_path}/cs={i}/otclean/eps={eps}/clean_train_dist.csv"),
                 }
         return datasets
 
@@ -901,21 +880,7 @@ def run_cross_validation(data_path, cv=5, test_type='CMI', eps=None):
     test_type: 'CMI', 'Chi', or 'G'
     """
     results = {
-        "original": [],
-        "vanilla_mst": [],
-        "vanilla_mst_2": [],
-        "vanilla_mst_pmd_cmi": [],
-        # "vanilla_mst_pmd_mmd": [],
-        "vanilla_mst_pmd_tvd_L2": [],
-        "vanilla_mst_cmi": [],
-        "vanilla_mst_cmi_2": [],
-        "vanilla_mst_cmi_3": [],
-        "vanilla_mst_pmd_tvd_L2_2": [],
-        "vanilla_greedy": [],
-        "vanilla_greedy_2": [],
-        "vanilla_opt": [],
-        "hard_constraint": [],
-        "vanilla_opt_2": []
+
     }
 
     # The constraint structure you provided: X, Y, Z
@@ -927,7 +892,6 @@ def run_cross_validation(data_path, cv=5, test_type='CMI', eps=None):
         test_func = compute_cmi
     elif test_type == 'Chi':
         test_func = test_conditional_independence_chi
-
     elif test_type == 'log':
         test_func = test_conditional_independence
     elif test_type == 'G':
@@ -970,23 +934,6 @@ def run_cross_validation(data_path, cv=5, test_type='CMI', eps=None):
                 print(f"{name}: {test_type}, P-value: {item[0]}")
 
 
-        # Store results (adjust keys according to your output labels)
-        # results["original"].append(ci_values["orig"][0])
-        # # results["vanilla_mst"].append(ci_values["mst"][0])
-        # results["vanilla_mst_2"].append(ci_values["mst_2"][0])
-        # # results["vanilla_mst_pmd_cmi"].append(ci_values["ours_cmi"][0])
-        # # results["vanilla_mst_pmd_mmd"].append(ci_values["ours_mmd"][0])
-        # # results["vanilla_mst_pmd_tvd_L2"].append(ci_values["ours_tvd_L2"][0])
-        # # results["vanilla_mst_pmd_tvd_L2_2"].append(ci_values["ours_tvd_L2_2"][0])
-        # # results["vanilla_mst_cmi"].append(ci_values["ours_cmi"][0])
-        # # results["vanilla_mst_cmi_2"].append(ci_values["ours_cmi_2"][0])
-        # results["vanilla_mst_cmi_2"].append(ci_values["ours_cmi_3"][0])
-        # # results["vanilla_mst_pmd_tvd_L2"].append(ci_values["ours_tvd_L2"][0])
-        # # results["vanilla_greedy"].append(ci_values["greedy"][0])
-        # results["vanilla_greedy_2"].append(ci_values["greedy_2"][0])
-        # # results["vanilla_opt"].append(ci_values["opt"][0])
-        # results["vanilla_opt_2"].append(ci_values["opt_2"][0])
-        # results["hard_constraint"].append(ci_values["hard_constraint"][0])
 
     return results
 
@@ -994,7 +941,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Run Cross-Validation for CI Tests.')
     
     parser.add_argument('--test_type', type=str, choices=['CMI', 'Chi', 'G', 'Perm', 'partial', 'KCI', 'pillai', 'log'], default='CMI', help='Conditional Independence Test type')
-    parser.add_argument('--eps', type=float, default=None, help='Epsilon value')
+    parser.add_argument('--eps', type=int, default=None, help='Epsilon value')
       
     args = parser.parse_args()
     print(f"for datapath: {DATA_PATH} -- epsilon {args.eps}")
@@ -1004,6 +951,3 @@ if __name__ == '__main__':
         test_type=args.test_type,
         eps=args.eps
     )
-
-    # Plot results
-    # plot_distance(dist_dict, args.test_type, f'res/{db_name}/eps={args.eps}/{db_name}_{args.test_type}_x_y_z.jpg')

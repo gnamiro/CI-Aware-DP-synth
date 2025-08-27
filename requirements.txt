@@ -33,5 +33,5 @@ jaxlib
 chex
 optax
 pytest
-pytype
+# pytype
 parameterized

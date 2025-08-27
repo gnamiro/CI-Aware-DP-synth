@@ -1,6 +1,8 @@
 # Virtual environment
 env/
 .env/
+venv/
+.venv/
 
 # Logs
 logs/

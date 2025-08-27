@@ -27,19 +27,19 @@ It provides implementations of our method (PrivCI), Prefair baselines (greedy an
 
 2. (Recommended) Create and activate a virtual environment:
 
-On Linux / MacOS:
+    On Linux / MacOS:
 
-```bash
-python3 -m venv venv
-source venv/bin/activate
-```
+        ```bash
+        python3 -m venv venv
+        source venv/bin/activate
+        ```
 
-On Windows (PowerShell):
+    On Windows (PowerShell):
 
-```bash
-python -m venv venv
-.\venv\Scripts\activate
-```
+        ```bash
+        python -m venv venv
+        .\venv\Scripts\activate
+        ```
 
 3. Install dependencies:
    ```bash
@@ -140,3 +140,23 @@ This evaluates synthetic datasets using machine learning models under different 
 
 ⚠️ Make sure that you have results for all methods (`mst`, `greedy`, `opt`, `privci`, `mst_hard`).
 If some methods are missing, comment out the corresponding `load_dataset` calls in evaluation scripts.
+
+⚠️ If you want to use floating-point eps values (e.g., eps=0.1, eps=0.01), update the argument type in the following files:
+
+    - `utils/CI_test.py`
+
+    - `utils/wasserstein_dist.py`
+
+    - `evaluate.py`
+
+Change:
+
+    ```bash
+    parser.add_argument('--eps', type=int, default=None, help='Epsilon value')
+    ```
+
+to:
+
+    ```bash
+    parser.add_argument('--eps', type=float, default=None, help='Epsilon value')
+    ```

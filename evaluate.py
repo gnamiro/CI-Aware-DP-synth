@@ -51,7 +51,7 @@ if __name__ == "__main__":
     # We don't need preprocessing because we don't have any categorical attribute in this case!!
     ## MST postprocessing 
 
-    
+    ML_ALGO = args.method
    
     print("Preprocessing is done...\n Now the data is ready to evaluate the performance of the methods!")
 
