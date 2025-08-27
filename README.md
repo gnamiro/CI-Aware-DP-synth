@@ -21,11 +21,27 @@ It provides implementations of our method (PrivCI), Prefair baselines (greedy an
 
 1. Clone the repository:
    ```bash
-   git clone <repo-link>
+   git clone https://github.com/gnamiro/CI-Aware-DP-synth.git
    cd CI_DP_synth
    ```
 
-2. Install dependencies:
+2. (Recommended) Create and activate a virtual environment:
+
+On Linux / MacOS:
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+On Windows (PowerShell):
+
+```bash
+python -m venv venv
+.\venv\Scripts\activate
+```
+
+3. Install dependencies:
    ```bash
    pip install -r requirements.txt
    ```
