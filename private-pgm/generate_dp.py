@@ -54,7 +54,7 @@ for i in cv:
 
             degree = 500 # PrivCI lambda coeff degree 
 
-            print(f"[INFO] cv:{i} and eps:{e} with cmi: {cmi_ratio}, degree: {degree}")
+            print(f"\n\n[INFO] Our method --> cv:{i} and eps:{e} with cmi: {cmi_ratio}, degree: {degree}")
             data = Dataset.load(dataset, domain)
 
             if type.lower() == 'privci':

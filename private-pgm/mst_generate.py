@@ -39,7 +39,7 @@ for i in cv:
         dataset = f'{DATA_PATH}/cs={i}/train.csv'
         domain = f'{DATA_PATH}/domain.json'
 
-        print(f"[INFO] cv:{i} and eps:{e}")
+        print(f"\n\n [INFO] MST-> cv:{i} and eps:{e}")
         data = Dataset.load(dataset, domain)
         start_time = time.time()
         model, decode_fn = mst.MST(data, e, delta)

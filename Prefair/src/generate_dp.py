@@ -29,7 +29,7 @@ type = PREFAIR_METHOD# Define your type of Prefair here --> G or E
 cv = 0
 for i in range(0, 5):
     for e in EPS:
-        print('cv:', str(i), " -- ", 'eps:', str(e))
+        print('\n\n[INFO] Preafair', type, 'cv:', str(i), " -- ", 'eps:', str(e))
         dataset = f'{DATA_PATH}/cs={i}/train.csv'
         domain = f'{DATA_DOMAIN_PATH}'
         data = Dataset.load(dataset, domain)

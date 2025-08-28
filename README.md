@@ -62,6 +62,14 @@ It provides implementations of our method (PrivCI), Prefair baselines (greedy an
 
 - You can check existing examples in `data/`.
 
+⚡ Quick Run Option
+
+You can either run the provided script `generate_dp.sh` (make sure to have Git Bash or WSL installed on Windows) to automatically create the necessary folders and execute all methods (`mst`, `prefair`, and our method) without manually running each one separately.  
+
+However, if you prefer to change parameters or run specific steps independently, you can follow the instructions below.
+
+---
+
 ### Step 3 – Preprocess Data
 
 - Open `utils/preprocess.py`.
@@ -160,3 +168,4 @@ to:
 ```bash
     parser.add_argument('--eps', type=float, default=None, help='Epsilon value')
 ```
+
