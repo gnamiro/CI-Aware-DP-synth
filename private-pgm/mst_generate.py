@@ -29,13 +29,13 @@ delta = 1e-9
 cv = [0, 1, 2, 3, 4]
 
 # FRACTIONS = [0, 0.2, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
-eps = [0.1, 1, 10]
+# eps = [0.1, 1, 10]
 
 summary_records = []
 # data_path = '../data/dutch'
 
 for i in cv:
-    for e in eps:
+    for e in EPS:
         dataset = f'{DATA_PATH}/cs={i}/train.csv'
         domain = f'{DATA_PATH}/domain.json'
 

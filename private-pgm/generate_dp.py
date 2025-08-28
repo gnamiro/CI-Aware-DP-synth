@@ -35,7 +35,7 @@ delta = 1e-9
 
 
 ## Define your type of method here --> privci or HC
-type = 'HC'
+type = OUR_METHOD
 
 
 ## Define privacy budget here
@@ -46,7 +46,7 @@ cv = [0, 1, 2, 3, 4]
 
 
 for i in cv:
-    for e in eps:
+    for e in EPS:
 
         for cmi_ratio in np.arange(0.01, 0.02, 0.05): # How much you want to decrease the CMI compared to the original CMI
             dataset = f'{DATA_PATH}/cs={i}/train.csv'

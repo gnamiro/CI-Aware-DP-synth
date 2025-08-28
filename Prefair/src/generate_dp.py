@@ -25,11 +25,10 @@ degree = 2
 num_marginals = None
 max_cells = 100000
 
-eps = [0.1, 1, 10]
-type = 'G' # Define your type of Prefair here --> G or E
+type = PREFAIR_METHOD# Define your type of Prefair here --> G or E
 cv = 0
 for i in range(0, 5):
-    for e in eps:
+    for e in EPS:
         print('cv:', str(i), " -- ", 'eps:', str(e))
         dataset = f'{DATA_PATH}/cs={i}/train.csv'
         domain = f'{DATA_DOMAIN_PATH}'

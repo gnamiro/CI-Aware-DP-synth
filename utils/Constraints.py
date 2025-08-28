@@ -56,16 +56,17 @@ DATA_PATH = f'./data/{DB_NAME}'
 DATA_DOMAIN_PATH = f'{DATA_PATH}/domain.json'
 
 
+#### Privacy Setting ####
 DELTA = 1e-9
+EPS = [0.1, 1, 10]
+OUR_METHOD = 'HC' # HC or PrivCI
+PREFAIR_METHOD = 'G' # G, E
+##################
+
 DROP_PROTECTED_ATTRIBUTE = 0 # Used in evaluation to exclude the protected attribute from classification task!
 
 ALGORITHMS = ['mst', 'greedy', 'opt', 'privCI', 'mst_hard']
 CV = 5
-
 MEASURES = ['Accuracy', 'AUC', 'Equalized_Odd', 'ROD', 
                                     'F1_score', 'TPR', 'FPR', 'Macro_F1', 
                                     'Macro_Precision', 'Macro_Recall', 'Demo_Par']
-
-
-
-ML_ALGO = 'MLP'
