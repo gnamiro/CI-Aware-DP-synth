@@ -78,6 +78,12 @@ However, if you prefer to change parameters or run specific steps independently,
 
 - Use the `split_data` method to create 5-fold cross-validation splits on the preprocessed data, while respecting the constraints defined in `utils/constraint.py`.
 
+- Run:
+
+    ```bash
+    python utils/preprocess.py --dataset Adult
+    ```
+
 ### Step 4 – Generate Synthetic Data
 
 You can choose between different methods:

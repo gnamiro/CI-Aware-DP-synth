@@ -2,7 +2,7 @@
 set -e  # stop if any command fails
 
 echo "[STEP 1] Preprocessing data..."
-python utils/preprocess.py
+python utils/preprocess.py --dataset Dutch
 
 echo "[STEP 2] Running Prefair Greedy/Exponential method..."
 python Prefair/src/generate_dp.py

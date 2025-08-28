@@ -10,6 +10,7 @@ TODO 2: Change the main method:
 
 import sys
 import os
+import argparse
 
 import pickle
 import pandas as pd
@@ -362,8 +363,17 @@ def split_data(data):
     data_split(data)
 
 if __name__ == "__main__":
-    dataset_name = 'Dutch' # 'Adult', 'Compas', 'Car', 'Boston'
-    if dataset_name == 'Adult':
+    parser = argparse.ArgumentParser(description="Preprocess dataset for DP synthetic data generation")
+    parser.add_argument(
+        "--dataset",
+        type=str,
+        required=True,
+        help="Dataset name to preprocess"
+    )
+    args = parser.parse_args()
+    dataset_name = args.dataset
+
+    if dataset_name.lower() == 'adult':
         df = load_dataset('Adult')
         ord_enc = OrdinalEncoder()
         for column in BINARY_COLUMNS:
@@ -373,7 +383,7 @@ if __name__ == "__main__":
         print(df.info())
         split_data(df)
 
-    elif dataset_name == 'Compas':
+    elif dataset_name.lower() == 'compas':
         df = load_dataset(dataset_name)
         ord_enc = OrdinalEncoder()
         for column in BINARY_COLUMNS:
@@ -382,7 +392,7 @@ if __name__ == "__main__":
         df.to_csv(f'{DATA_PATH}/compas.csv')
         split_data(df)
     
-    elif dataset_name == 'Dutch':
+    elif dataset_name.lower() == 'dutch':
         df = pd.read_csv(f'{DATA_PATH}/dutch.csv')
         df = df[ADMISSIBLE_ATTRS+PROTECTED_ATTRS+INADMISSIBLE_ATTRS+OUTCOME]
         split_data(df)

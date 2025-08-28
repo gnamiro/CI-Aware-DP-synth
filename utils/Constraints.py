@@ -40,7 +40,6 @@
 ####################################
 ##########    Dutch     ############
 ####################################
-#### Prefair
 FILE_NAME = "dutch"
 DB_NAME = 'dutch'
 TARGET_ATTR = 'occupation'
@@ -55,15 +54,18 @@ CONSTRAINT = [PROTECTED_ATTRS, OUTCOME, ADMISSIBLE_ATTRS]
 DATA_PATH = f'./data/{DB_NAME}'
 DATA_DOMAIN_PATH = f'{DATA_PATH}/domain.json'
 
-
-#### Privacy Setting ####
+###########################
+##### Privacy Setting #####
 DELTA = 1e-9
 EPS = [0.1, 1, 10]
 OUR_METHOD = 'HC' # HC or PrivCI
 PREFAIR_METHOD = 'G' # G, E
-##################
+###########################
 
-DROP_PROTECTED_ATTRIBUTE = 0 # Used in evaluation to exclude the protected attribute from classification task!
+
+
+
+DROP_PROTECTED_ATTRIBUTE = 0 # TODO: will be removed in future versions
 
 ALGORITHMS = ['mst', 'greedy', 'opt', 'privCI', 'mst_hard']
 CV = 5
