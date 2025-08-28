@@ -143,20 +143,20 @@ If some methods are missing, comment out the corresponding `load_dataset` calls 
 
 ⚠️ If you want to use floating-point eps values (e.g., eps=0.1, eps=0.01), update the argument type in the following files:
 
-    - `utils/CI_test.py`
+- `utils/CI_test.py`
 
-    - `utils/wasserstein_dist.py`
+- `utils/wasserstein_dist.py`
 
-    - `evaluate.py`
+- `evaluate.py`
 
 Change:
 
-    ```bash
+```bash
     parser.add_argument('--eps', type=int, default=None, help='Epsilon value')
-    ```
+```
 
 to:
 
-    ```bash
+```bash
     parser.add_argument('--eps', type=float, default=None, help='Epsilon value')
-    ```
+```

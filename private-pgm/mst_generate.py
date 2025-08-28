@@ -1,11 +1,22 @@
 
 import sys
 import os
-sys.path.append('./mechanisms')
+THIS_DIR = os.path.dirname(os.path.abspath(__file__))
+SRC_DIR = os.path.join(THIS_DIR, 'src')
+MECH_DIR = os.path.join(THIS_DIR, 'mechanisms')
+
+
+for p in [SRC_DIR, MECH_DIR]:
+    if p not in sys.path:
+        sys.path.append(p)
+
+utils_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'utils'))
+sys.path.append(utils_path)
+from Constraints import *
 
 import pandas as pd
 import numpy as np
-from mbi import Dataset
+from src.mbi import Dataset
 import mst as mst
 
 import time
@@ -21,12 +32,12 @@ cv = [0, 1, 2, 3, 4]
 eps = [0.1, 1, 10]
 
 summary_records = []
-data_path = '../data/dutch'
+# data_path = '../data/dutch'
 
 for i in cv:
     for e in eps:
-        dataset = f'{data_path}/cs={i}/train.csv'
-        domain = f'{data_path}/domain.json'
+        dataset = f'{DATA_PATH}/cs={i}/train.csv'
+        domain = f'{DATA_PATH}/domain.json'
 
         print(f"[INFO] cv:{i} and eps:{e}")
         data = Dataset.load(dataset, domain)
@@ -38,6 +49,6 @@ for i in cv:
 
         elapsed = time.time()
 
-        save_path = f"{data_path}/cs={i}/mst/eps={str(e)}/results_mst_{i}.csv"
+        save_path = f"{DATA_PATH}/cs={i}/mst/eps={str(e)}/results_mst_{i}.csv"
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
         data.to_csv(save_path, index=False);

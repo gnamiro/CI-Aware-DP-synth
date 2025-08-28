@@ -1,9 +1,10 @@
 {
+    "edu_level": 6,
     "economic_status": 3,
+    "cur_eco_activity": 12,
+    "sex": 2,
     "household_position": 8,
     "household_size": 6,
-    "sex": 2,
-    "edu_level": 6,
     "age": 12,
     "marital_status": 4,
     "country_birth": 3,

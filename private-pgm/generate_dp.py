@@ -1,8 +1,18 @@
 
 import sys
 import os
-sys.path.append('./mechanisms')
-sys.path.append('./src/mbi')
+THIS_DIR = os.path.dirname(os.path.abspath(__file__))
+SRC_DIR = os.path.join(THIS_DIR, 'src')
+MECH_DIR = os.path.join(THIS_DIR, 'mechanisms')
+
+for p in [SRC_DIR, MECH_DIR]:
+    if p not in sys.path:
+        sys.path.append(p)
+
+utils_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'utils'))
+sys.path.append(utils_path)
+from Constraints import *
+
 
 import pandas as pd
 import numpy as np
@@ -24,17 +34,6 @@ max_cells = 100000
 delta = 1e-9
 
 
-## Define you dataset and constraints here
-data_path = '../data/dutch'
-TARGET_ATTR = 'occupation'
-protected_attr = 'sex'
-admissible = ['economic_status', 'household_position', 'household_size']
-inadmissible = ['edu_level', 'age', 'marital_status', 'country_birth', 'citizenship', 'prev_residence_place']
-outcome = [TARGET_ATTR]
-protected = [protected_attr]
-CONSTRAINT = [protected, outcome, admissible]
-
-
 ## Define your type of method here --> privci or HC
 type = 'HC'
 
@@ -50,8 +49,8 @@ for i in cv:
     for e in eps:
 
         for cmi_ratio in np.arange(0.01, 0.02, 0.05): # How much you want to decrease the CMI compared to the original CMI
-            dataset = f'{data_path}/cs={i}/train.csv'
-            domain = f'{data_path}/domain.json'
+            dataset = f'{DATA_PATH}/cs={i}/train.csv'
+            domain = f'{DATA_PATH}/domain.json'
 
             degree = 500 # PrivCI lambda coeff degree 
 
@@ -65,23 +64,23 @@ for i in cv:
                 model, decode_fn, logs = cmst.MST(data, e, delta, 
                                             cmi_value=cmi_ratio, 
                                             degree=degree, 
-                                            proc_attr=protected_attr)
+                                            proc_attr=PROTECTED_ATTR)
 
             else:
                 # Hard Constraint
                 model, decode_fn = hard_mst.MST(data, e, delta, 
-                                                protected=protected, 
-                                                outcome=outcome, 
-                                                admissible=admissible, 
-                                                inadmissible=inadmissible)
+                                                protected=PROTECTED_ATTRS, 
+                                                outcome=OUTCOME, 
+                                                admissible=ADMISSIBLE_ATTRS, 
+                                                inadmissible=INADMISSIBLE_ATTRS)
 
             synth = model.synthetic_data()
             synth = decode_fn(synth)
             data = synth.df
             if type.lower() == 'privci':
-                save_path = f"{data_path}/cs={i}/privCI/eps={str(e)}/results_privCI_{i}.csv"
+                save_path = f"{DATA_PATH}/cs={i}/privCI/eps={str(e)}/results_privCI_{i}.csv"
             else:
-                save_path = f"{data_path}/cs={i}/hard_constraint/eps={str(e)}/results_mst_hard_{i}.csv"
+                save_path = f"{DATA_PATH}/cs={i}/hard_constraint/eps={str(e)}/results_mst_hard_{i}.csv"
             os.makedirs(os.path.dirname(save_path), exist_ok=True)
             data.to_csv(save_path, index=False);
             
