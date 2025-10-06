@@ -198,12 +198,12 @@ def load_dataset(filename):
         dataframe = reduce_domain_size(dataframe)
 
     elif filename == 'Compas':
-        dataframe = pd.read_csv(f'{data_path}/compas-scores-two-years.csv')
+        dataframe = pd.read_csv(f'{DATA_PATH}/compas-scores-two-years.csv')
         dataframe = dataframe.loc[~dataframe['race'].isin(['Native American', 'Hispanic', 'Asian', 'Other']), :]
         dataframe['is-recid'] = dataframe['is-recid'].apply(lambda x: 1-x)
         dataframe['age-cat'] = dataframe['age-cat'].apply(lambda x: adjustAge(x))
         dataframe['priors-count'] = dataframe['priors-count'].apply(lambda x: quantizePrior_old(x))
-    return dataframe[protected_attributes+admissibles+inadmissibles+outcome]
+    return dataframe[PROTECTED_ATTRS+ADMISSIBLE_ATTRS+INADMISSIBLE_ATTRS+OUTCOME]
 
 def load_mushroom_subset():
     df = pd.read_csv(f'{DATA_PATH}/agaricus-lepiota.data', header=None)
@@ -358,6 +358,100 @@ def mushroom_preprocess(data):
     dump_domain(data)
     data_split(data)
 
+def pass_preprocess(data):
+    discretize_numeric = True
+    label_col="pass_bar"
+    num_bins=5
+
+    np.random.seed(42)
+    rng = np.random.default_rng(42)
+
+    data.replace(
+        to_replace=["unknown", "Unknown", "NA", "na", "NaN", ""],
+        value=np.nan,
+        inplace=True,
+    )
+
+    # 3) Convert string TRUE/FALSE to 1/0 (preserve NaNs)
+    for col in data.columns:
+        s = data[col]
+        # Only consider object-like or mixed types
+        if s.dtype == "object" or pd.api.types.is_string_dtype(s):
+            non_na_str = s.dropna().astype(str).str.lower()
+            if not non_na_str.empty and non_na_str.isin({"true", "false"}).all():
+                data[col] = (
+                    s.astype(str).str.lower().map({"true": 1, "false": 0})
+                    .astype("Int64")  # nullable int
+                )
+    # 4) Strip quotes/spaces from string columns WITHOUT turning NaN into "nan"
+    for col in data.select_dtypes(include=["object"]).columns:
+        data[col] = data[col].str.strip().str.strip('"').str.strip("'")
+
+    # 5) Discretize numeric features (excluding label)
+    if discretize_numeric:
+        numeric_cols = data.select_dtypes(include=[np.number]).columns.tolist()
+        if label_col and label_col in numeric_cols:
+            numeric_cols.remove(label_col)
+        for col in numeric_cols:
+            try:
+                # qcut can create NaNs for constant columns; handled later
+                data[col] = pd.qcut(data[col], q=num_bins, labels=False, duplicates="drop")
+            except Exception as e:
+                print(f"[cleaner] Could not discretize {col}: {e}")
+
+    cat_cols = data.select_dtypes(include=["object"]).columns.tolist()
+    if cat_cols:
+        try:
+            enc = OrdinalEncoder(
+                handle_unknown="use_encoded_value",
+                unknown_value=-1,
+                encoded_missing_value=-1,  # sklearn >= 1.1
+            )
+            data[cat_cols] = enc.fit_transform(data[cat_cols]).astype("int64")
+        except TypeError:
+            # Fallback for older sklearn: encode unknown as -1, then convert NaN to -1
+            enc = OrdinalEncoder(
+                handle_unknown="use_encoded_value",
+                unknown_value=-1,
+            )
+            arr = enc.fit_transform(data[cat_cols])
+            # Replace NaN from encoder with -1
+            arr = np.where(np.isnan(arr), -1, arr)
+            data[cat_cols] = arr.astype("int64")
+
+    # 7) Impute NaN/-1 using values drawn from OBSERVED categories in each column
+    #    (prevents introducing unseen categories, e.g., 2 in a binary column)
+    for col in data.columns:
+        s = data[col]
+        # Work with numeric-like columns (after encoding/discretization most are numeric/Int64)
+        mask = s.isna() | (s == -1)
+        if mask.any():
+            valid = s[~s.isna() & (s != -1)].unique()
+            if valid.size > 0:
+                data.loc[mask, col] = rng.choice(valid, size=int(mask.sum()))
+            else:
+                # If the whole column is missing, default to 0
+                data.loc[mask, col] = 0
+
+    constant_cols = [c for c in data.columns if data[c].nunique(dropna=True) <= 1]
+    if constant_cols:
+        print(f"[cleaner] Dropping constant columns: {constant_cols}")
+        data = data.drop(columns=constant_cols)
+
+    # 8) Convert all columns to plain int (after imputation there should be no NaN/-1 carryover)
+    data = data.astype(int)
+
+    # 9) Drop leaky columns
+    LEAKY_COLS = [
+        "bar1", "bar2", "bar1_yr", "bar2_yr", "bar", "bar_passed",
+        "Dropout", "dnn_bar_pass_prediction"
+    ]
+    data = data.drop(columns=[c for c in LEAKY_COLS if c in data.columns], errors="ignore")
+
+
+    return data
+
+
 def split_data(data):
     dump_domain(data)
     data_split(data)
@@ -376,9 +470,9 @@ if __name__ == "__main__":
     if dataset_name.lower() == 'adult':
         df = load_dataset('Adult')
         ord_enc = OrdinalEncoder()
-        for column in BINARY_COLUMNS:
+        for column in BINARY_COLS:
             df.loc[:, column] = ord_enc.fit_transform(df[[column]])
-        df[BINARY_COLUMNS] = df[BINARY_COLUMNS].apply(pd.to_numeric)
+        df[BINARY_COLS] = df[BINARY_COLS].apply(pd.to_numeric)
         df.to_csv(f"{DATA_PATH}/adult.csv")
         print(df.info())
         split_data(df)
@@ -386,13 +480,20 @@ if __name__ == "__main__":
     elif dataset_name.lower() == 'compas':
         df = load_dataset(dataset_name)
         ord_enc = OrdinalEncoder()
-        for column in BINARY_COLUMNS:
+        for column in BINARY_COLS:
             df.loc[:, column] = ord_enc.fit_transform(df[[column]])
-        df[BINARY_COLUMNS] = df[BINARY_COLUMNS].apply(pd.to_numeric)
+        df[BINARY_COLS] = df[BINARY_COLS].apply(pd.to_numeric)
         df.to_csv(f'{DATA_PATH}/compas.csv')
         split_data(df)
     
     elif dataset_name.lower() == 'dutch':
         df = pd.read_csv(f'{DATA_PATH}/dutch.csv')
         df = df[ADMISSIBLE_ATTRS+PROTECTED_ATTRS+INADMISSIBLE_ATTRS+OUTCOME]
+        split_data(df)
+    
+    elif dataset_name.lower() == 'law':
+        df = pd.read_csv(f'{DATA_PATH}/bar_pass_1.csv')
+        df = df[ADMISSIBLE_ATTRS+PROTECTED_ATTRS+INADMISSIBLE_ATTRS+OUTCOME]
+        # df = pass_preprocess(df) # --> Preparation for pass dataset
+
         split_data(df)

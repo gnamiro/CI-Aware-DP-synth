@@ -14,15 +14,14 @@ utils_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'util
 sys.path.append(utils_path)
 
 from Constraints import *
+from results_io import set_metric
 
-def evaluate(path, algorithm, method, dfs, cv, ml_algo, proc_dop):
+def evaluate(path, algorithm, method, dfs, cv, ml_algo, proc_dop, eps=None):
     for i in range(cv):
-        # train_path, test_path = f'{path}/cs={i}/train_one_hot.csv',  f'{path}/cs={i}/test_one_hot.csv'
-        # train_path, test_path = f'{path}/cs={i}/train_one_hot.csv',  f'{path}/cs={i}/train_one_hot.csv'
         train_path, test_path = f'{path}/cs={i}/train.csv',  f'{path}/cs={i}/test.csv'
         num_iter = 1
         new_df = ml_predict(train_path, test_path, ml_algo, num_iter, proc_drop=proc_dop, dist=0)
-
+        set_metric(csv_path, method_name=method, fold_num=i, epsilon=eps, metric_name=f'{ml_algo}_AUC', value=new_df['AUC'][0])
         dfs[algorithm][method] = pd.concat([dfs[algorithm][method], new_df], axis=0)
     print(dfs[algorithm][method].mean(axis=0))
     print(dfs[algorithm][method].std(axis=0))
@@ -40,6 +39,8 @@ def evaluate_original(path, algorithm, method, folder, file_name, dfs, cv, ml_al
         print(method, file_name, train_path, test_path)     
         num_iter = i
         new_df = ml_predict(train_path, test_path, ml_algo, num_iter, proc_drop=proc_drop, dist=0)
+
+        set_metric(csv_path, method_name=method, fold_num=i, epsilon=eps, metric_name=f'{ml_algo}_AUC', value=new_df['AUC'][0])
 
         dfs[algorithm][method] = pd.concat([dfs[algorithm][method], new_df], axis=0)
         print("((((((((((((((((((((((((((((((((((()))))))))))))))))))))))))))))))))))")

@@ -9,6 +9,7 @@ from tqdm import tqdm
 
 # Assumed imports from your existing codebase
 from Constraints import *
+from results_io import ensure_results_table, set_metric
 from visualization import plot_distance
 
 # Device setup for torch (optional)
@@ -296,12 +297,12 @@ def load_datasets_for_fold(data_path, i, eps):
         return datasets
     else:
         datasets = {
-                    # "orig": pd.read_csv(f"{data_path}/cs={i}/train_label.csv"),
-                    "greedy": pd.read_csv(f"{data_path}/cs={i}/greedy/eps={eps}/results_greedy_{i}.csv"),
+                    "Original": pd.read_csv(f"{data_path}/cs={i}/train.csv"),
+                    "PrefairG": pd.read_csv(f"{data_path}/cs={i}/greedy/eps={eps}/results_greedy_{i}.csv"),
                     # "greedy_2": pd.read_csv(f"{data_path}/cs={i}/greedy/eps={eps}/results_greedy_same_size_{i}.csv"),
-                    # "opt": pd.read_csv(f"{data_path}/cs={i}/opt/eps={eps}/results_opt_{i}.csv"),
+                    "PrefairE": pd.read_csv(f"{data_path}/cs={i}/opt/eps={eps}/results_opt_{i}.csv"),
                     # "opt_2": pd.read_csv(f"{data_path}/cs={i}/opt/eps={eps}/results_opt_same_size_{i}.csv"),
-                    'mst': pd.read_csv(f"{data_path}/cs={i}/mst/eps={eps}/results_mst_{i}.csv"),
+                    'MST': pd.read_csv(f"{data_path}/cs={i}/mst/eps={eps}/results_mst_{i}.csv"),
                     # 'mst_2': pd.read_csv(f"{data_path}/cs={i}/mst/eps={eps}/results_mst_same_size_{i}.csv"),
                     # 'ours_cmi': pd.read_csv(f"{data_path}/cs={i}/cmi/eps={eps}/results_mst_cmi_{i}.csv"), 
                     # 'ours_cmi_2': pd.read_csv(f"{data_path}/cs={i}/cmi/eps={eps}/results_mst_cmi_weighted_{i}.csv"), 
@@ -309,9 +310,9 @@ def load_datasets_for_fold(data_path, i, eps):
                     # # 'ours_mmd': pd.read_csv(f"{data_path}/cs={i}/ours_mmd/eps={eps}/results_mst_pmd_mmd_{i}.csv"), 
                     # 'ours_tvd_L2': pd.read_csv(f"{data_path}/cs={i}/tvd_L2/eps={eps}/results_mst_pmd_tvd_L2_{i}.csv"),
                     # 'ours_tvd_L2_2': pd.read_csv(f"{data_path}/cs={i}/tvd_L2/eps={eps}/results_mst_tvd_L2_same_size_{i}.csv"),
-                    'privCI': pd.read_csv(f"{data_path}/cs={i}/privCI/eps={eps}/results_privCI_{i}.csv"),
+                    'PrivCI': pd.read_csv(f"{data_path}/cs={i}/privCI/eps={eps}/results_privCI_{i}.csv"),
                     # 'ours_tvd_L2': pd.read_csv(f"{data_path}/cs={i}/tvd_L2/eps={eps}/results_tvd_L2_same_space_{i}.csv"),
-                    'hard_constraint': pd.read_csv(f"{data_path}/cs={i}/hard_constraint/eps={eps}/results_mst_hard_{i}.csv"),
+                    'HC': pd.read_csv(f"{data_path}/cs={i}/hard_constraint/eps={eps}/results_mst_hard_{i}.csv"),
                     # 'mst+otclean': pd.read_csv(f"{data_path}/cs={i}/otclean/eps={eps}/clean_train_dist.csv"),
                     # 'mst+otclean+': pd.read_csv(f"{data_path}/cs={i}/otclean/eps={eps}/clean_train_dist.csv"),
                 }
@@ -319,24 +320,24 @@ def load_datasets_for_fold(data_path, i, eps):
 import json
 
 def evaluate_datasets(data_path, cv=5, distance_metric='wasserstein', eps=None):
-    results = {
-        # "orig": [],
-        "mst": [],
-        # "mst_2": [],
-        # "ours_tvd_L2": [],
-        # "ours_tvd_L2_2": [],
-        "hard_constraint": [],
-        "privCI": [],
-        # "ours_cmi": [],
-        # "ours_cmi_2": [],
-        # "ours_cmi_3": [],
-        "greedy": [],
-        # "greedy_2": [],
-        # "opt": [],
-        # "opt_2": [],
-        # "mst+otclean": [],
-        # "mst+otclean+": []
-    }
+    # results = {
+    #     # "orig": [],
+    #     "mst": [],
+    #     # "mst_2": [],
+    #     # "ours_tvd_L2": [],
+    #     # "ours_tvd_L2_2": [],
+    #     "hard_constraint": [],
+    #     "privCI": [],
+    #     # "ours_cmi": [],
+    #     # "ours_cmi_2": [],
+    #     # "ours_cmi_3": [],
+    #     "greedy": [],
+    #     # "greedy_2": [],
+    #     "opt": [],
+    #     # "opt_2": [],
+    #     # "mst+otclean": [],
+    #     # "mst+otclean+": []
+    # }
 
     # Load domain from JSON file
     with open(f"{data_path}/domain.json", "r") as f:
@@ -371,26 +372,32 @@ def evaluate_datasets(data_path, cv=5, distance_metric='wasserstein', eps=None):
             #     synth_dist = convert_to_dist(synth_df, selected_columns, target_domain)
             # else:
             synth_dist = convert_to_dist(synth_df, selected_columns, target_domain)
-
+            epsilon = None if model_name == "Original" else eps
             if distance_metric == 'w':
                 distance = wasserstein_distance_dist(train_dist, synth_dist, domain_array)
+                set_metric(csv_path, method_name=model_name, fold_num=i, epsilon=epsilon, metric_name='W-dist', value=distance)
             elif distance_metric == 'Wa':
                 distance = wasserstein_distance_(train_df, synth_df, CONSTRAINT)
+                set_metric(csv_path, method_name=model_name, fold_num=i, epsilon=epsilon, metric_name='W-dist', value=distance)
             elif distance_metric == 'kl':
                 distance = kl_divergence(train_dist, synth_dist)
+                set_metric(csv_path, method_name=model_name, fold_num=i, epsilon=epsilon, metric_name='KL', value=distance)
             elif distance_metric == 'tvd':
                 distance = total_variation(train_dist, synth_dist)
+                set_metric(csv_path, method_name=model_name, fold_num=i, epsilon=epsilon, metric_name='TVD', value=distance)
             elif distance_metric == 'MMD':
                 distance = mmd_rbf(mst_dist, synth_dist, domain_array)
+                set_metric(csv_path, method_name=model_name, fold_num=i, epsilon=epsilon, metric_name='MMD', value=distance)
             elif distance_metric == 'sinkhorn':
                 distance = sinkhorn_distance(train_df, synth_df, domain_array)
+                set_metric(csv_path, method_name=model_name, fold_num=i, epsilon=epsilon, metric_name='sinkhorn', value=distance)
             else:
                 raise ValueError("Unsupported distance metric")
 
             print(f"Fold {i} | {model_name} | {distance_metric}: {distance:.4f}")
-            results[model_name].append(distance)
+            # results[model_name].append(distance)
 
-    return results
+    return None
 
 
 
@@ -400,19 +407,22 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Run Cross-Validation for CI Tests.')
     
     parser.add_argument('--dist_type', type=str, choices=['kl', 'w', 'tvd', 'Wa', 'MMD'], default='W', help='Distance type')
-    parser.add_argument('--eps', type=float, default=None, help='Epsilon value')
+    # parser.add_argument('--eps', type=str, default=None, help='Epsilon value')
     
     args = parser.parse_args()
 
     metric = args.dist_type
-    eps = args.eps
+    # eps = args.eps
 
     # for metric in distance_metrics:
     print(f"Running {metric} distance evaluation...")
-    summary_results = evaluate_datasets(DATA_PATH, cv=5, distance_metric=metric, eps=eps)
+    ensure_results_table(csv_path, methods=methods, cv=CV)
 
-    print("\nResults Summary")
-    for model, stats in summary_results.items():
-        print(f"{model} -- Mean: {np.mean(stats):.4f}, Std: {np.std(stats):.4f}")
+    for e in EPS:
+        summary_results = evaluate_datasets(DATA_PATH, cv=5, distance_metric=metric, eps=e)
+
+    # print("\nResults Summary")
+    # for model, stats in summary_results.items():
+    #     print(f"{model} -- Mean: {np.mean(stats):.4f}, Std: {np.std(stats):.4f}")
 
     # plot_distance(summary_results, metric, f'res/{db_name}/eps={args.eps}/{db_name}_{metric}.jpg')

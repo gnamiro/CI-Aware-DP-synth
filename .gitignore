@@ -6,7 +6,9 @@ venv/
 
 # Logs
 logs/
+Logs/
 *.log
+results/
 
 # Jupyter
 .ipynb_checkpoints/
@@ -20,3 +22,9 @@ __pycache__/
 
 # Workflow
 .github/
+
+# Data
+data/
+*.csv
+
+

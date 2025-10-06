@@ -24,7 +24,6 @@ memory_profiler
 xgboost
 openpyxl
 catboost
-dit
 tqdm
 pgmpy
 attrs
@@ -33,5 +32,4 @@ jaxlib
 chex
 optax
 pytest
-# pytype
 parameterized

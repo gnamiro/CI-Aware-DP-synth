@@ -204,14 +204,14 @@ def ml_predict(path, test_path, model_name, num_iter, proc_drop, dist):
 
     
     
-    equi_odd = equalized_odds_difference(test_without_onehot[TARGET_ATTR], test_without_onehot['Predicted'], sensitive_features=test_without_onehot[PROTECTED_ATTRS[0]])
-    equalized_odds = equi_odd
+    # equi_odd = equalized_odds_difference(test_without_onehot[TARGET_ATTR], test_without_onehot['Predicted'], sensitive_features=test_without_onehot[PROTECTED_ATTRS[0]])
+    # equalized_odds = equi_odd
 
     
-    dem_prity = demographic_parity_difference(test_without_onehot[TARGET_ATTR],
-                                                test_without_onehot['Predicted'],
-                                                sensitive_features=test_without_onehot[PROTECTED_ATTRS[0]])
-    dem_pars = dem_prity
+    # dem_prity = demographic_parity_difference(test_without_onehot[TARGET_ATTR],
+    #                                             test_without_onehot['Predicted'],
+                                                # sensitive_features=test_without_onehot[PROTECTED_ATTRS[0]])
+    # dem_pars = dem_prity
 
     
     print("Accuracy: " + str(accuracy_vals))
@@ -224,11 +224,12 @@ def ml_predict(path, test_path, model_name, num_iter, proc_drop, dist):
     print("Equalized Odd: " + str(equalized_odds))
     print("Demographic Parity: " + str(dem_pars))
 
-    stats = np.array([[accuracy_vals, auc_vals, equalized_odds, _rod_vals, f1_scores,
-                        tp / (tp + fn), fp / (fp + tn),
-                        avg_f1_scores, precision_vals, recall_scores, dem_pars]])
-    parts = path.split("/")
-    filename = parts[-2] + "_" + parts[-1]
+    # stats = np.array([[accuracy_vals, auc_vals, equalized_odds, _rod_vals, f1_scores,
+    #                     tp / (tp + fn), fp / (fp + tn),
+    #                     avg_f1_scores, precision_vals, recall_scores, dem_pars]])\
+    stats = np.array([[auc]])
+    # parts = path.split("/")
+    # filename = parts[-2] + "_" + parts[-1]
     df = pd.DataFrame(stats, columns=MEASURES)
     # print(df.head())
     return(df)

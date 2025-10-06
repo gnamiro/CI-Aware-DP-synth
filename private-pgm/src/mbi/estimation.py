@@ -26,6 +26,7 @@ import sys, os
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 CONSTRAINT_DIR = os.path.join(THIS_DIR, '..', '..', '..', 'utils')
 sys.path.append(CONSTRAINT_DIR)
+from Constraints import *
 
 _DEFAULT_CALLBACK = lambda t, loss: print(loss) if t % 50 == 0 else None
 jax.config.update("jax_enable_x64", True)
@@ -732,10 +733,11 @@ def calculate_regularizer_loss(theta, total):
 
 
     ## how CI constraint should look like
+    print(CONSTRAINT_DIR)
     target_attr = TARGET_ATTR
     protected_attribute = PROTECTED_ATTR
-    inadmissibles = INADMISSIBLES
-    admissibles = ADMISSIBLES
+    inadmissibles = INADMISSIBLE_ATTRS
+    admissibles = ADMISSIBLE_ATTRS
     # constraint = [[protected_attribute],inadmissibles , admissibles]
     # constraint = [[protected_attribute]+inadmissibles, [target_attr] , admissibles]
     constraint = [[protected_attribute], [target_attr] , admissibles]

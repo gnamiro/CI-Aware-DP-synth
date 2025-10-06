@@ -8,6 +8,7 @@ import itertools
 import argparse
 
 from Constraints import *
+from results_io import ensure_results_table, set_metric
 from visualization import plot_distance
 
 import dit
@@ -863,12 +864,12 @@ def load_datasets(data_path, i, eps):
         return datasets
     else:
         datasets = {
-                    # "orig": pd.read_csv(f"{data_path}/cs={i}/train.csv"),
-                    "greedy": pd.read_csv(f"{data_path}/cs={i}/greedy/eps={eps}/results_greedy_{i}.csv"),
-                    # "opt": pd.read_csv(f"{data_path}/cs={i}/opt/eps={eps}/results_opt_{i}.csv"),
-                    'mst': pd.read_csv(f"{data_path}/cs={i}/mst/eps={eps}/results_mst_{i}.csv"),
-                    'privCI': pd.read_csv(f"{data_path}/cs={i}/privCI/eps={eps}/results_privCI_{i}.csv"),
-                    'hard_constraint': pd.read_csv(f"{data_path}/cs={i}/hard_constraint/eps={eps}/results_mst_hard_{i}.csv"),
+                    "Original": pd.read_csv(f"{data_path}/cs={i}/train.csv"),
+                    "PrefairG": pd.read_csv(f"{data_path}/cs={i}/greedy/eps={eps}/results_greedy_{i}.csv"),
+                    "PrefairE": pd.read_csv(f"{data_path}/cs={i}/opt/eps={eps}/results_opt_{i}.csv"),
+                    'MST': pd.read_csv(f"{data_path}/cs={i}/mst/eps={eps}/results_mst_{i}.csv"),
+                    'PrivCI': pd.read_csv(f"{data_path}/cs={i}/privCI/eps={eps}/results_privCI_{i}.csv"),
+                    'HC': pd.read_csv(f"{data_path}/cs={i}/hard_constraint/eps={eps}/results_mst_hard_{i}.csv"),
                 }
         return datasets
 
@@ -922,16 +923,20 @@ def run_cross_validation(data_path, cv=5, test_type='CMI', eps=None):
         # Print results
         print(f'\nResults for test type: {test_type}')
         for name, item in ci_values.items():
+            epsilon = None if name == "Original" else eps
             if item[-1] == 'pillai':
                 print(f"{name}: {test_type}, P-value: {item[1]}")
             if len(item) == 4:
                 print(f"{name}: {test_type} by Joint: {item[0]} -- {test_type} by entropy (DIT): {item[1]}, diff: {item[1]==item[3]}")
+                set_metric(csv_path, method_name=name, fold_num=i, epsilon=epsilon, metric_name='CMI', value=item[0])
             elif len(item) == 3:
                 print(f"{name}: {test_type} T_observed: {item[1]} -- T_perm: {item[2]}, P Value: {item[0]}")
             elif len(item) == 2:
                 print(f"{name}: {test_type}: {item[0]}, P-value: {item[1]}")
+                set_metric(csv_path, method_name=name, fold_num=i, epsilon=epsilon, metric_name='CHI_P_Val', value=item[1])
             else:
                 print(f"{name}: {test_type}, P-value: {item[0]}")
+                set_metric(csv_path, method_name=name, fold_num=i, epsilon=epsilon, metric_name='CHI', value=item[0][1])
 
 
 
@@ -941,13 +946,16 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Run Cross-Validation for CI Tests.')
     
     parser.add_argument('--test_type', type=str, choices=['CMI', 'Chi', 'G', 'Perm', 'partial', 'KCI', 'pillai', 'log'], default='CMI', help='Conditional Independence Test type')
-    parser.add_argument('--eps', type=int, default=None, help='Epsilon value')
+    # parser.add_argument('--eps', type=str, default=None, help='Epsilon value')
       
     args = parser.parse_args()
-    print(f"for datapath: {DATA_PATH} -- epsilon {args.eps}")
-    dist_dict = run_cross_validation(
-        data_path=DATA_PATH,
-        cv=CV,
-        test_type=args.test_type,
-        eps=args.eps
-    )
+    print(f"for datapath: {DATA_PATH}")
+
+    ensure_results_table(csv_path, methods=methods, cv=CV)
+    for e in EPS:
+        dist_dict = run_cross_validation(
+            data_path=DATA_PATH,
+            cv=CV,
+            test_type=args.test_type,
+            eps=e
+        )

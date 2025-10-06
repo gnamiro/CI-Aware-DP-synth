@@ -109,7 +109,7 @@ def select(data, rho, measurement_log,outcome,admissible, cliques=[] ):
         T.add_edge(*e)
         ds.union(*e)
 
-    #print(list(T.edges))
+    # print(list(T.edges))
 
     return list(T.edges)
 
